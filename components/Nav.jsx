@@ -8,19 +8,20 @@ import { signIn, signOut, useSession, getProviders } from 'next-auth/react';
 
 
 const Nav = () => {
-    const isUserLoggedIn = true;
+    const { data: session } = useSession();
+
     const [providers, setProviders] = useState(null);
     const [toggleDropdown, setToggleDropdown] = useState(false);
 
 
     useEffect(() => {
-        const settingProviders = async () => {
+        const setUpProviders = async () => {
             const response = await getProviders();
 
             setProviders(response);
         }
 
-        settingProviders();
+        setUpProviders();
     }, [])
 
     return (
@@ -44,7 +45,7 @@ const Nav = () => {
 
             {/* Desktop Naviagtion */}
             <div className="hidden sm:flex">
-                {isUserLoggedIn ? (
+                {session?.user ? (
                     <div className="flex gap-3 md:gap-5">
                         <Link
                             href="/create-prompt"
@@ -65,7 +66,7 @@ const Nav = () => {
                             href="/profile"
                         >
                             <Image
-                                src="/assets/images/logo.svg"
+                                src={session?.user.image}
                                 alt="profile"
                                 width={37}
                                 height={37}
@@ -77,7 +78,7 @@ const Nav = () => {
 
                 ) : (
                     <>
-                        {providers ?? Object.values(providers).map((provider) => (
+                        {providers && Object.values(providers).map((provider) => (
                             <button
                                 key={provider.name}
                                 onClick={() => signIn(provider.id)}
@@ -94,11 +95,11 @@ const Nav = () => {
 
             {/* Mobile Naviagtion */}
             <div className="sm:hidden flex relative">
-                {isUserLoggedIn ? (
+                {session?.user ? (
 
                     <div className="flex">
                         <Image
-                            src="/assets/images/logo.svg"
+                            src={session?.user.image}
                             alt="profile"
                             width={37}
                             height={37}
@@ -154,7 +155,7 @@ const Nav = () => {
                 )}
             </div>
 
-        </nav >
+        </nav>
     )
 }
 
