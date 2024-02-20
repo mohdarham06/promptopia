@@ -64,7 +64,7 @@ const Form = (
                         disabled={isSubmitting}
                         className='px-5 py-1.5 text-sm bg-primary-orange rounded-full text-white'
                     >
-                        {isSubmitting ? `${type}ing...` : type}
+                        {isSubmitting ? `${type}...` : type}
                     </button>
                 </div>
             </form>
