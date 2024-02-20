@@ -4,7 +4,6 @@ import Prompt from "@models/prompt";
 
 
 export const POST = async (request) => {
-
     const { userId, prompt, tag } = await request.json();
 
     try {
@@ -20,7 +19,7 @@ export const POST = async (request) => {
 
     } catch (error) {
         console.log(error);
-        return new Response("Failed to create a new prompt", { status: 500 });
+        return new Response("Failed to create a new Prompt", { status: 500 });
     }
 
 }
