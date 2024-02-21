@@ -1,17 +1,34 @@
 'use client'
 
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';
 
 import Form from '@components/Form';
 
 
-const EditPrompt = () => {
+const UpdatePrompt = () => {
     const router = useRouter();
     const { data: session } = useSession();
+    // Wrap useSearchParams in Suspense
     const searchParams = useSearchParams();
-    const promptId = searchParams.get('id');
+
+    // Handle the case when promptId is not present
+    if (!searchParams.get('id')) {
+        // Redirect to an error page or another appropriate page
+        // router.push('/error');
+        return (
+            <div>
+                <h1 className="head_text text-left">
+                    <span className="blue_gradient">Error: Prompt ID not found</span>
+                </h1>
+
+                <p className="desc text-left max-w-md">
+                    Please check the URL and try again.
+                </p>
+            </div>
+        );
+    }
 
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [post, setPost] = useState({
@@ -20,27 +37,42 @@ const EditPrompt = () => {
     });
 
 
+
     useEffect(() => {
         const getPromptDetails = async () => {
-            const response = await fetch(`api/prompt/${promptId}`);
+            try {
+                const promptId = searchParams.get('id');
+                if (!promptId) {
+                    throw new Error("Missing PromptId!");
+                }
 
-            const data = await response.json();
+                const response = await fetch(`api/prompt/${promptId}`);
+                if (!response.ok) {
+                    throw new Error("Failed to fecth prompt details")
+                }
 
-            setPost({
-                prompt: data.prompt,
-                tag: data.tag,
-            })
+                const data = await response.json();
+                setPost({
+                    prompt: data.prompt,
+                    tag: data.tag,
+                })
+
+            } catch (error) {
+                console.log(error)
+            }
+
         }
 
-        if (promptId) getPromptDetails();
-    }, [promptId])
+        getPromptDetails();
+    }, [searchParams])
 
 
-    const updatePrompt = async (e) => {
+    const editPrompt = async (e) => {
         e.preventDefault();
         setIsSubmitting(true);
+        const promptId = searchParams.get('id');
 
-        if(!promptId) return alert('Prompt ID not found')
+        if (!promptId) return alert('Prompt ID not found');
 
         try {
             const response = await fetch(`/api/prompt/${promptId}`, {
@@ -64,14 +96,17 @@ const EditPrompt = () => {
 
 
     return (
-        <Form
-            type="Edit"
-            post={post}
-            setPost={setPost}
-            isSubmitting={isSubmitting}
-            handleSubmit={updatePrompt}
-        />
+        <Suspense fallback={<h1>Loading...</h1>}>
+
+            <Form
+                type="Edit"
+                post={post}
+                setPost={setPost}
+                isSubmitting={isSubmitting}
+                handleSubmit={editPrompt}
+            />
+        </Suspense>
     )
 }
 
-export default EditPrompt
+export default UpdatePrompt
