@@ -25,7 +25,7 @@ const ProfilePage = () => {
 
 
     const handleEdit = (post) => {
-        router.push(`/update-prompt?id=${post._id}`)
+        router.push(`/update-prompt/${post._id}`)
     }
 
 
