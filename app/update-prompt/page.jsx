@@ -5,7 +5,7 @@ const UpdatePrompt = () => {
     return (
         <div>
             <h1 className="head_text text-left">
-                <span className="blue_gradient">Error: Prompt ID not found</span>
+                <span className="blue_gradient">Error: Prompt not found</span>
             </h1>
 
             <p className="desc text-left max-w-md">

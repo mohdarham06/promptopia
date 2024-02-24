@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 
+import Loader from "@components/Loader";
 import PromptCard from "./PromptCard";
 
 
@@ -28,15 +29,40 @@ const Feed = () => {
     const [searchTimeout, setSearchTimeout] = useState(null);
     const [searchedResults, setSearchedResults] = useState([]);
 
+    const [loading, setLoading] = useState(true);
+    const [loadingFailed, setLoadingFailed] = useState(false);
 
-    useEffect(() => {
-        const fetchPosts = async () => {
+    const maxRetries = 3;
+    let retryCount = 0;
+
+    const fetchPosts = async () => {
+        try {
+            setLoading(true);
+            setLoadingFailed(false);
             const response = await fetch("/api/prompt");
             const data = await response.json();
 
             setAllPosts(data);
-        };
+            setLoading(false);
 
+        } catch (error) {
+            console.log(error)
+
+            if (retryCount < maxRetries) {
+                setTimeout(() => {
+                    retryCount++;
+                    console.log(`retry feed: ${retryCount}`);
+                    fetchPosts();
+                }, 4000);
+            } else {
+                setLoading(false);
+                setLoadingFailed(true);
+                console.log('Feed loading failed');
+            }
+        }
+    };
+
+    useEffect(() => {
         fetchPosts();
     }, []);
 
@@ -88,18 +114,39 @@ const Feed = () => {
                 />
             </form>
 
-            {/* All Prompts */}
-            {searchText ? (
-                <PromptCardList
-                    data={searchedResults}
-                    handleTagClick={handleTagClick}
-                />
-            ) : (
-                <PromptCardList
-                    data={allPosts}
-                    handleTagClick={handleTagClick}
-                />
-            )}
+
+
+            {loading && <Loader />}
+
+            {!loading && loadingFailed &&
+                <div className="text-2xl text-[red] mt-6 flex flex-col items-center">
+                    Loading Failed. Try Again!
+                    <div
+                        onClick={fetchPosts}
+                        className="mt-4 text-[#0071e2] text-center font-medium text-lg py-2 px-12 border border-[#0071e2] rounded-md cursor-pointer select-none"
+                    >
+                        Reload
+                    </div>
+                </div>
+            }
+
+
+
+            {!loading && !loadingFailed &&
+                <>
+                    {searchText ? (
+                        <PromptCardList
+                            data={searchedResults}
+                            handleTagClick={handleTagClick}
+                        />
+                    ) : (
+                        <PromptCardList
+                            data={allPosts}
+                            handleTagClick={handleTagClick}
+                        />
+                    )}
+                </>
+            }
         </section>
     )
 }
