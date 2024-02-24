@@ -7,7 +7,7 @@ Welcome to Promptopia, a prompt sharing platform where you can create, discover,
 
 ## Live Demo
 
-* https://
+* https://promptopia06.vercel.app/
 
 
 ## Features
