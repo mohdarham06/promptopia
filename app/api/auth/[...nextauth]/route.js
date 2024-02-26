@@ -1,12 +1,12 @@
-import nextAuth from "next-auth";
 
+import NextAuth from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 
-import { connectToDB } from "@utils/database";
 import User from "@models/user";
+import { connectToDB } from "@utils/database";
 
 
-const handler = nextAuth({
+const handler = NextAuth({
     providers: [
         GoogleProvider({
             clientId: process.env.GOOGLE_ID,
@@ -14,7 +14,6 @@ const handler = nextAuth({
         })
     ],
     callbacks: {
-
         async session({ session }) {
             const sessionUser = await User.findOne({
                 email: session.user.email
@@ -26,7 +25,7 @@ const handler = nextAuth({
         },
 
 
-        async signIn({ profile }) {
+        async signIn({ account, profile, user, credentials }) {
             try {
                 //serverless -> lamda -> dynamodb
                 await connectToDB();
@@ -41,15 +40,15 @@ const handler = nextAuth({
                     await User.create({
                         email: profile.email,
                         username: profile.name.replace(" ", "").toLowerCase(),
-                        image: profile.picture
-                    })
+                        image: profile.picture,
+                    });
                 }
 
                 return true;
 
             } catch (error) {
 
-                console.log(error)
+                console.log("Error checking if user exists: ", error.message);
                 return false;
             }
         }
